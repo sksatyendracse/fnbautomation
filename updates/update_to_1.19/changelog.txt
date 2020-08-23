@@ -1,0 +1,369 @@
+--------------------------------------------------
+v.1.19 8 May, 2020
+--------------------------------------------------
+[00] [version change]
+	=> inc/common.inc.php
+
+[01] [fix] GROUP_CONCAT select needs GROUP BY
+	=> plugins/custom_fields/user-form-block.php
+
+[02] [improve] cfg_max_free_listings (allow max free listings configuration)
+	=> user/select-plan.php
+	=> user/process-add-place.php
+	=> templates/user_templates/tpl_select-plan.php
+
+[03] [improve] create cfg_date_format
+	=> inc/common.inc.php
+
+[04] [improve] remove 2checkout
+	=> inc/common.inc.php
+	=> user/process-add-place.php
+
+--------------------------------------------------
+v.1.18 26 August, 2019
+--------------------------------------------------
+[00] [version change]
+	=> inc/common.inc.php
+
+[01] [improve] add category count to parents
+	=> all-categories.php
+
+[02] [improve] check if listing paid
+	=> all-categories.php
+
+[03] [improve] delete coupon, don't echo image url after unlink
+	=> user/my-coupons.php
+
+[04] [fix] show_menu() use page_order
+	=> inc/functions.php
+
+[05] [fix] undefined translation string
+	=> admin/admin-locations.php
+
+[06] [fix] order by place_id instead of id and remove break statements
+	=> index.php
+
+[07] [improve] add more maps
+	=> admin/admin-settings.php
+	=> inc/map-provider-options.php
+
+[08] [improve] child template support
+	=> _contact.php
+	=> _msg.php
+	=> all-categories.php
+	=> coupons.php
+	=> index.php
+	=> list.php
+	=> p.php
+	=> place.php
+	=> profile.php
+	=> _searchresults.php
+	=> user/add-place.php
+	=> user/edit-pass.php
+	=> user/edit-place.php
+	=> user/login.php
+	=> user/logoff.php
+	=> user/my-coupons.php
+	=> user/my-places.php
+	=> user/my-reviews.php
+	=> user/password-request.php
+	=> user/password-reset.php
+	=> user/process-add-place.php
+	=> user/process-edit-pass.php
+	=> user/process-edit-place.php
+	=> user/resend-confirmation.php
+	=> user/select-plan.php
+	=> user/sign-up.php
+	=> user/sign-up-confirm.php
+	=> user/thanks.php
+	=> templates/_header.php
+	=> templates/_footer.php
+
+[09] [fix] process-add-coupon including unnecessary template file
+	=> user/process-add-coupon.php
+
+[10] [improve] create database auto updater
+	=> inc/common.inc.php
+	=> db-updater.php (created)
+	=> db-updater-sample.php (created)
+
+--------------------------------------------------
+v.1.17 20 April, 2019
+--------------------------------------------------
+
+[00] [version change]
+	=> inc/common.inc.php
+
+[01] [feature] auto approve listing after payment
+	=> inc/my.functions.php
+	=> payment_gateways/paypal.php
+	=> payment_gateways/stripe.php
+
+[02] [feature] default approve profile picture
+	=> inc/my.functions.php
+	=> user/process-upload-profile.php
+
+[03] [fix] fix html code
+	=> templates/tpl_contact.php
+
+[04] [fix] when a custom field is deleted, it still shows values in the place.php page
+	=> plugns/custom_fields/user-custom-fields-place.php
+
+[05] [improve] modifications to tpl_index.php
+	=> templates/tpl_index.php
+	=> templates/css/styles.css
+
+[06] [improve] add front page carousel
+	=> templates/tpl_index.php
+	=> templates/js/js-index.php
+	=> templates/css/styles.css
+
+[07] [improve] option to disable select2 (city autocomplete)
+	=> language/__/admin_translations/trans-settings.php
+	=> inc/common.inc.php
+	=> admin/admin-settings.php
+	=> admin/admin-process-settings.php
+	=> templates/js/js-footer.php
+	=> templates/_header.php
+	=> templates/_footer.php
+	=> templates/user_templates/tpl_add-place.php
+	=> templates/js/user_js/js-add-place.php
+	=> templates/user_templates/tpl_edit-place.php
+	=> templates/js/user_js/js-edit-place.php
+	=> templates/js/user_js/js-user-footer.php
+
+[08] [improve] implement leaflet geocoding plugin
+	=> templates/js/user_js/js-add-place.php
+	=> templates/js/user_js/js-edit-place.php
+	=> templates/js/user_js/js-add-place-map.php (removed because realized not being used anywhere)
+	=> templates/js/user_js/js-edit-place-map.php (removed because realized not being used anywhere)
+
+[09] [improve] site settings, change password fields to text fields to avoid erroneous autocomplete
+	=> admin/admin-settings.php
+
+[10] [improve] change category icons
+	=> templates/css/styles.css
+	=> templates/_footer.php
+
+[11] [fix] include trans-coupons.php to all language folders
+	=> language/__/admin_translations/trans-coupons.php
+
+List of files changed:
+
+=> admin/admin-process-settings.php
+=> admin/admin-settings.php
+=> inc/common.inc.php
+=> inc/my.functions.php
+=> language/__/admin_translations/trans-settings.php
+=> payment_gateways/paypal.php
+=> payment_gateways/stripe.php
+=> plugns/custom_fields/user-custom-fields-place.php
+=> templates/_footer.php
+=> templates/_header.php
+=> templates/css/styles.css
+=> templates/js/js-footer.php
+=> templates/js/js-index.php
+=> templates/js/user_js/js-add-place.php
+=> templates/js/user_js/js-edit-place.php
+=> templates/js/user_js/js-user-footer.php
+=> templates/tpl_contact.php
+=> templates/tpl_index.php
+=> templates/user_templates/tpl_add-place.php
+=> templates/user_templates/tpl_edit-place.php
+=> user/process-upload-profile.php
+
+--------------------------------------------------
+v.1.16 8 January, 2019
+--------------------------------------------------
+
+[00] [version change]
+	=> inc/common.inc.php
+
+[01] [improve] cancel stripe subscription when user deletes listing
+	=> admin/process-remove-listing-perm.php
+	=> payment-gateways/index.php (created)
+	=> payment-gateways/stripe.php
+	=> user/process-remove-place.php
+
+[02] [improve] show latest listings on homepage
+	=> inc/my.functions.php
+	=> index.php
+	=> templates/tpl_index.php
+
+List of files changed:
+=> admin/process-remove-listing-perm.php
+=> inc/common.inc.php
+=> inc/my.functions.php
+=> index.php
+=> payment-gateways/index.php (created)
+=> payment-gateways/stripe.php
+=> templates/tpl_index.php
+=> user/process-remove-place.php
+
+--------------------------------------------------
+v.1.15 20 December, 2018
+--------------------------------------------------
+
+[00] [version change]
+	=> inc/common.inc.php
+
+[01] [improvement] change listing details page layout
+	=> templates/css/styles.css
+	=> templates/tpl_place.php
+
+[02] [improvement] change categories icons
+	=> templates/icons {created folder}
+	=> removed Flaticon.eot/Flaticon.svg/Flaticon.ttf/Flaticon.woff/
+	=> templates/_html_head.php
+
+[03] [improvement] change x mark in Select2 dropdown
+	=> templates/js/js-footer.php
+
+--------------------------------------------------
+v.1.14 06 December, 2018
+--------------------------------------------------
+
+[00] [version change]
+	=> inc/common.inc.php
+
+[01] [improvement] add config '$cfg_has_cents' for plans pricing
+	=> inc/my.functions.php
+	=> user/select-plan.php
+
+[02] [improvement] add /year display text for annual plans
+	=> user/select-plan.php
+	=> language/xx/__trans-global.php
+
+
+[03] [improvement] when latlng is empty, lat[0] and lng[1] could be missing
+	=> user/process-add-place.php
+	=> user/process-edit-place.php
+
+[04] [fix] include hybridauth-config.php file in the 'inc' folder
+	=> inc/hybridauth-config.php
+
+[05] [fix] create location if lat/lng is empty, throws mysql error
+	=> admin/admin-locations.php
+	=> admin/admin-modal-form-create-loc.php
+	=> admin/admin-process-create-loc.php
+	=> admin/admin-get-loc.php
+
+[06] [improvement] plan boxes use bootstrap cards to avoid hard coded number of lines
+	=> templates/user_templates/tpl-select-plan.php
+
+--------------------------------------------------
+v.1.13 06 November, 2018
+--------------------------------------------------
+
+[00] [version change]
+	=> inc/common.inc.php
+
+[01] [improvement] add session token to contact page
+	-> _contact.php
+	-> language/xx/_trans-contact.php
+	-> process-contact.php
+	-> templates/_html_head.php
+	-> templates/js/js-contact.php
+	-> templates/tpl_contact.php
+
+[02] [improvement] lang folder, if not exists, default to 'en'
+	-> inc/common.inc.php
+
+[03] [improvement] move hybridauth config to inc folder
+	-> user/login.php
+
+[04] [fix] in v.1.12 $user_query was changed to $keyword in _searchresults.php but tpl file still uses $user_query
+	-> _searchresults.php
+
+[05] [improvement] increase click area for sign up link
+	-> templates/user_templates/tpl_login.php
+
+[06] [improvement] add csrf/session token to sign up page to prevent bot activity
+	-> templates/js/user_js/js-sign-up.php
+	-> templates/user_templates/tpl_sign-up.php
+	-> user/process-sign-up.php [created file]
+	-> user/sign-up.php
+
+[07] [improvement] setlocale to (LC_ALL, NULL);
+	-> inc/common.inc.php
+
+[08] [improvement] minor changes to single listing style
+	-> templates/css/styles.css
+
+[09] [improvement] sign-up and login pages, don't show social buttons if no keys are present
+	-> templates/user_templates/tpl_sign-up.php
+	-> templates/user_templates/tpl_login.php
+
+--------------------------------------------------
+v.1.12
+--------------------------------------------------
+
+[00] [version change]
+	=> inc/common.inc.php
+
+[01] [improvement] add token to sessions
+	-> inc/common.inc.php
+	-> user/login.php
+
+[02] [improvement] add lat/lng to create city in admin area
+	-> admin/admin-locations.php
+	-> admin/admin-get-loc.php (created)
+	-> admin/admin-modal-form-create-loc.php
+	-> admin/admin-process-create-loc.php
+	-> admin/admin-process-edit-loc.php
+	-> language/xx/admin_translations/trans-locations.php
+
+[03] [fix] $paypal_merchant_id can be set to $paypal_sandbox_merch_id in 'common.inc.php'. This causes the $paypal_merchant_id value to be incorrectly set when updating the settings page, causing $paypal_merchant_id to be updated to the value of $paypal_sandbox_merch_id
+	-> admin/admin-settings.php
+
+[04] [fix] transactions history page, pagination redirects to 'moderate-reviews' page
+	-> admin/admin-txn-history.php
+
+[05] [fix] check user owns place before deleting pics
+	-> user/process-remove-place.php
+
+[06] [fix] sanitization improvement
+	-> _searchresults.php
+	-> templates/js/js-searchresults.php
+	-> admin/reviews.php
+	-> admin/reviews-trash.php
+	-> user/edit-place.php
+	-> plugins/claim_listings/process-claim.php
+
+[07] [improve] make buttons uniform
+	-> templates/user_templates/tpl_my-places.php
+	-> templates/user_templates/tpl_my-reviews.php
+
+[08] [improve] admin listings show pending
+	-> admin/admin-listings.php
+	-> admin/_admin_styles.css
+
+[09] [improve] admin reviews show pending
+	-> admin/admin-reviews.php
+
+[10] [improve] header search allow clear city
+	-> templates/js/js-footer.php
+
+[11] [improve] - remove payment gateway related code from the  file
+	-> templates/user_templates/tpl_process-add-place.php
+
+[12] [fix] - when search contains only * it returns error
+	-> _searchresults.php
+	-> templates/js/js-searchresults.php
+
+[12] [fix] - when advanced search contains only * it returns error
+	-> plugins/custom_fields/search.php
+
+[13] [improvement] - search results, order by relevance and featured
+	-> _searchresults.php
+
+[14] [improvement] - advanced search results, order by relevance and featured
+	-> plugins/custom_fields/search.php
+
+[15] [improvement] - fix display of select2 field in header search
+	-> templates/css/styles.css (#city-input height property)
+
+v.1.12b
+
+[16] [fix] - smtp password field was not being prepopulated so when user updates settings, the smtp password is reset to empty
+	-> admin/admin-settings.php
