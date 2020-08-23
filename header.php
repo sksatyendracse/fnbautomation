@@ -105,7 +105,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 				<div class="row">
 					<div class="v3-mob-menu">
 						<div class="v3-mob-m-1">
-							<a href="index-1.html"><img src="images/logo2.png" alt=""> </a>
+							<a href="<?php echo $baseurl;?>"><img src="images/logo2.png" alt=""> </a>
 						</div>
 						<div class="v3-mob-m-2">
 							<div class="v3-top-ri">
