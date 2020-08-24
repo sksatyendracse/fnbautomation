@@ -345,7 +345,7 @@ $txt_transfer_owner = (!empty($txt_transfer_owner)) ? $txt_transfer_owner : "Tra
                             <td><span class="list-img"><img src="<?= $baseurl; ?>/admin/images/listing/<?php echo $row['cover_image'];?>" alt=""></span> </td>
 														<td><a href="#"><span class="list-enq-name"><?php echo $row['place_name'];?></span><span class="list-enq-city"><?php echo $row['address'];?></span></a> </td>
 														<td><?php echo $row['phone'];?>,<br> <?php echo $row['postal_code'];?></td>
-														<td>Singapore</td>
+														<td><?php echo $row['city_name'];?></td>
 														<td><?php echo $row['name'];?></td>
 														<td> <span class="label label-success"><?php echo ucfirst($row['status']);?></span> </td>
 														<td>

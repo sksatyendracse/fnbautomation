@@ -252,7 +252,7 @@ new AjaxUpload('upload-button', {
 		}
 		else {
 			// extension is not allowed
-			$('<div id="upload_failed"></div>').appendTo('#uploaded').text('Invalid file type');
+			$('<div id="upload_failed"></div>').appendTo('#uploaded').text('Failed to move file. Please upload with dimention 750*500');
 
 			// cancel upload
 			return false;
@@ -283,7 +283,7 @@ new AjaxUpload('upload-button', {
 
 		else if(response == 10) {
 			// Value: 10; custom error code, failed to move file
-			$('<div id="upload_failed"></div>').appendTo('#uploaded').text('<?= $txt_error_upload; ?>');
+			$('<div id="upload_failed"></div>').appendTo('#uploaded').text('Failed to move file. Please upload with dimention 750*500');
 			// cancel upload
 			return false;
 		}
@@ -303,6 +303,7 @@ new AjaxUpload('upload-button', {
 		}
 
 		else {  // upload success
+			var response = response.trim();
 			var thumb = '<?= $pic_baseurl; ?>/<?= $place_tmp_folder ?>/' + response;
 
 			// store thumb container div in memory

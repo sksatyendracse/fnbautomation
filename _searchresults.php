@@ -11,8 +11,18 @@ $stmt = $conn->prepare($query);
 $stmt->execute();
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$query_city_id = !empty($_GET['city_id']) ? $row['city_id'] : 0;
-$keyword       = !empty($_GET['query'  ]) ? $_GET['query'  ] : '';
+
+$total_cat_rows = 0;
+$response_cat = array();
+$query_cat = "SELECT * FROM cats WHERE name LIKE '%".$_GET['query']."%'";
+$stmt_cat = $conn->prepare($query_cat);
+$stmt_cat->execute();
+$row_cat = $stmt_cat->fetch(PDO::FETCH_ASSOC);
+
+$cityNamaQ = isset($row['city_id'])?$row['city_id']:$_GET['city_id'];
+$catNamaQ = isset($row_cat['id'])?$row_cat['id']:$_GET['query'];
+$query_city_id = !empty($_GET['city_id']) ? $cityNamaQ : 0;
+$keyword       = !empty($_GET['query'  ]) ? $catNamaQ : '';
 $page          = !empty($_GET['page'   ]) ? $_GET['page'   ] : 1;
 
 // fix v.1.13
@@ -23,13 +33,6 @@ if($keyword == '*') {
 	$keyword = '';
 }
 
-// check city_id
-if(!is_numeric($query_city_id)) {
-	header("HTTP/1.0 404 Not Found");
-	die('Invalid city id');
-}
-
-$query_city_id = (int)$query_city_id;
 
 // check page
 if(!is_numeric($page)) {
@@ -42,7 +45,7 @@ $page = (int)$page;
 /*--------------------------------------------------
 pagination
 --------------------------------------------------*/
-$limit = $items_per_page;
+$limit = 5;
 
 if($page > 1) {
 	$offset = ($page-1) * $limit + 1;
@@ -61,181 +64,112 @@ else {
 	$pag = "- $txt_page $page";
 }
 
-/*--------------------------------------------------
-keyword
---------------------------------------------------*/
-$query_query = explode(' ', trim($keyword));
-$new_query = '';
+if(intval($query_city_id) && intval($keyword)) {
+	$query = "SELECT COUNT(*)  AS total_rows
+	FROM places p
+	LEFT JOIN cities c ON p.city_id = c.city_id
+	LEFT JOIN rel_place_cat rel ON p.place_id = rel.place_id
+	WHERE p.city_id = $query_city_id AND rel.cat_id = $keyword AND p.status = 'approved' AND paid = 1";
+} else if(intval($query_city_id)) {
+	$query = "SELECT COUNT(*)  AS total_rows
+	FROM places p
+	LEFT JOIN cities c ON p.city_id = c.city_id
+	LEFT JOIN rel_place_cat rel ON p.place_id = rel.place_id
+	WHERE p.city_id = $query_city_id AND p.status = 'approved' AND paid = 1";
+} else if(intval($keyword)) {
+	$query = "SELECT  COUNT(*)  AS total_rows
+	FROM places p
+	LEFT JOIN cities c ON p.city_id = c.city_id
+	LEFT JOIN rel_place_cat rel ON p.place_id = rel.place_id
+	WHERE rel.cat_id = $keyword AND p.status = 'approved' AND paid = 1";
+} else {
+	$query = "SELECT COUNT(*)  AS total_rows
+	FROM places p
+	LEFT JOIN cities c ON p.city_id = c.city_id
+	WHERE (address like '%".$query_city_id."%' OR place_name like '%".$keyword."%') AND p.status = 'approved' AND paid = 1";
 
-foreach($query_query as $v) {
-	if(!empty($v)) {
-		$new_query .= "$v* ";
-	}
 }
-
-$query_query = $new_query;
-
-// city details
-$query_city_name  = '';
-$query_state_abbr = '';
-
-if(!empty($query_city_id)) {
-	$query = "SELECT city_name, state FROM cities WHERE city_id = :query_city_id";
-	$stmt = $conn->prepare($query);
-	$stmt->bindValue(':query_city_id', $query_city_id);
-	$stmt->execute();
-
-	$row = $stmt->fetch(PDO::FETCH_ASSOC);
-	$query_city_name = $row['city_name'];
-	$query_state_abbr = $row['state'];
-}
-
-/*--------------------------------------------------
-Count results
---------------------------------------------------*/
-if(!empty($query_city_id) && !empty($keyword)) {
-	$query = "SELECT COUNT(*) AS total_rows
-		FROM places
-		WHERE city_id = :city_id AND status = 'approved' AND paid = 1
-			AND MATCH(place_name, description) AGAINST(:query IN BOOLEAN MODE)";
-
-	$stmt = $conn->prepare($query);
-	$stmt->bindValue(':city_id', $query_city_id);
-	$stmt->bindValue(':query', $query_query);
-	$stmt->execute();
-	$row = $stmt->fetch(PDO::FETCH_ASSOC);
-	$total_rows = $row['total_rows'];
-}
-
-else if (empty($query_city_id) && !empty($keyword)) {
-	$query = "SELECT COUNT(*) AS total_rows
-		FROM places
-		WHERE status = 'approved' AND paid = 1
-		AND MATCH(place_name, description) AGAINST(:query IN BOOLEAN MODE)";
-
-	$stmt = $conn->prepare($query);
-	$stmt->bindValue(':query', $query_query);
-	$stmt->execute();
-	$row = $stmt->fetch(PDO::FETCH_ASSOC);
-	$total_rows = $row['total_rows'];
-}
-
-else if (!empty($query_city_id) && empty($keyword)) {
-	$query = "SELECT COUNT(*) AS total_rows
-		FROM places
-		WHERE status = 'approved' AND paid = 1 AND city_id = :city_id";
-
-	$stmt = $conn->prepare($query);
-	$stmt->bindValue(':city_id', $query_city_id);
-	$stmt->execute();
-	$row = $stmt->fetch(PDO::FETCH_ASSOC);
-	$total_rows = $row['total_rows'];
-}
-
-else {
-	$total_rows = 0;
-}
+$stmt = $conn->prepare($query);
+$stmt->execute();
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+$total_rows = $row['total_rows'];
 
 $pager = new DirectoryApp\PageIterator($limit, $total_rows, $page);
 $start = $pager->getStartRow();
 
-// initialize empty city and query check
-$empty_city_and_query = false;
-
-/*--------------------------------------------------
-Query
---------------------------------------------------*/
-if(!empty($query_city_id) && !empty($keyword)) {
+if(intval($query_city_id) && intval($keyword)) {
 	$query = "SELECT p.place_id, p.place_name, p.address, p.cross_street,
-				p.postal_code, p.phone, p.area_code, p.lat, p.lng, p.state_id, p.description,
-				c.city_name, c.slug, c.state, ph.filename, ph.dir,
-				rev_table.avg_rating,
-				MATCH(place_name, description) AGAINST(:query2 IN BOOLEAN MODE) AS relevance
-				FROM places p
-				LEFT JOIN cities c ON p.city_id = c.city_id
-				LEFT JOIN photos ph ON p.place_id = ph.place_id
-				LEFT JOIN (
-					SELECT *,
-						AVG(rev.rating) AS avg_rating
-						FROM reviews rev
-						GROUP BY place_id
-					) rev_table ON p.place_id = rev_table.place_id
-				WHERE p.city_id = :city_id AND p.status = 'approved' AND paid = 1
-					AND MATCH(place_name, description) AGAINST(:query IN BOOLEAN MODE)
-				GROUP BY p.place_id
-				ORDER BY relevance DESC, p.feat DESC
-				LIMIT :start, :limit";
+	p.postal_code, p.phone, p.area_code, p.lat, p.lng, p.state_id, p.description, p.cover_image,
+	c.city_name, c.slug, c.state
+	FROM places p
+	LEFT JOIN cities c ON p.city_id = c.city_id
+	LEFT JOIN rel_place_cat rel ON p.place_id = rel.place_id
+	WHERE p.city_id = :city_id AND rel.cat_id = :cat_id AND p.status = 'approved' AND paid = 1
+	GROUP BY p.place_id
+	ORDER BY p.feat DESC
+	LIMIT :start, :limit";
 	$stmt = $conn->prepare($query);
 	$stmt->bindValue(':city_id', $query_city_id);
-	$stmt->bindValue(':query', $query_query);
-	$stmt->bindValue(':query2', $query_query);
+	$stmt->bindValue(':cat_id', $keyword);
 	$stmt->bindValue(':start', $start);
 	$stmt->bindValue(':limit', $limit);
-}
-
-else if(empty($query_city_id) && !empty($keyword)) {
+	$stmt->execute();
+} else if(intval($query_city_id)) {
 	$query = "SELECT p.place_id, p.place_name, p.address, p.cross_street,
-				p.postal_code, p.phone, p.area_code, p.lat, p.lng, p.state_id, p.description,
-				c.city_name, c.slug, c.state, ph.filename, ph.dir,
-				rev_table.avg_rating,
-				MATCH(place_name, description) AGAINST(:query2 IN BOOLEAN MODE) AS relevance
-				FROM places p
-				LEFT JOIN cities c ON p.city_id = c.city_id
-				LEFT JOIN photos ph ON p.place_id = ph.place_id
-				LEFT JOIN (
-					SELECT *,
-						AVG(rev.rating) AS avg_rating
-						FROM reviews rev
-						GROUP BY place_id
-					) rev_table ON p.place_id = rev_table.place_id
-				WHERE p.status = 'approved' AND paid = 1
-					AND MATCH(place_name, description) AGAINST(:query IN BOOLEAN MODE)
-				GROUP BY p.place_id
-				ORDER BY relevance DESC, p.feat DESC
-				LIMIT :start, :limit";
-	$stmt = $conn->prepare($query);
-	$stmt->bindValue(':query', $query_query);
-	$stmt->bindValue(':query2', $query_query);
-	$stmt->bindValue(':start', $start);
-	$stmt->bindValue(':limit', $limit);
-}
-
-else if(!empty($query_city_id) && empty($keyword)) {
-	$query = "SELECT p.place_id, p.place_name, p.address, p.cross_street,
-				p.postal_code, p.phone, p.area_code, p.lat, p.lng, p.state_id, p.description,
-				c.city_name, c.slug, c.state, ph.filename, ph.dir,
-				rev_table.avg_rating
-				FROM places p
-				LEFT JOIN cities c ON p.city_id = c.city_id
-				LEFT JOIN photos ph ON p.place_id = ph.place_id
-				LEFT JOIN (
-					SELECT *,
-						AVG(rev.rating) AS avg_rating
-						FROM reviews rev
-						GROUP BY place_id
-					) rev_table ON p.place_id = rev_table.place_id
-				WHERE p.city_id = :city_id AND p.status = 'approved' AND paid = 1
-				GROUP BY p.place_id
-				ORDER BY p.feat DESC
-				LIMIT :start, :limit";
+	p.postal_code, p.phone, p.area_code, p.lat, p.lng, p.state_id, p.description, p.cover_image,
+	c.city_name, c.slug, c.state
+	FROM places p
+	LEFT JOIN cities c ON p.city_id = c.city_id
+	LEFT JOIN rel_place_cat rel ON p.place_id = rel.place_id
+	WHERE p.city_id = :city_id AND p.status = 'approved' AND paid = 1
+	GROUP BY p.place_id
+	ORDER BY p.feat DESC
+	LIMIT :start, :limit";
 	$stmt = $conn->prepare($query);
 	$stmt->bindValue(':city_id', $query_city_id);
 	$stmt->bindValue(':start', $start);
 	$stmt->bindValue(':limit', $limit);
+	$stmt->execute();
+} else if(intval($keyword)) {
+	$query = "SELECT p.place_id, p.place_name, p.address, p.cross_street,
+	p.postal_code, p.phone, p.area_code, p.lat, p.lng, p.state_id, p.description, p.cover_image,
+	c.city_name, c.slug, c.state
+	FROM places p
+	LEFT JOIN cities c ON p.city_id = c.city_id
+	LEFT JOIN rel_place_cat rel ON p.place_id = rel.place_id
+	WHERE rel.cat_id = :cat_id AND p.status = 'approved' AND paid = 1
+	GROUP BY p.place_id
+	ORDER BY p.feat DESC
+	LIMIT :start, :limit";
+	$stmt = $conn->prepare($query);
+	$stmt->bindValue(':cat_id', $keyword);
+	$stmt->bindValue(':start', $start);
+	$stmt->bindValue(':limit', $limit);
+	$stmt->execute();
+} else {
+	$query = "SELECT p.place_id, p.place_name, p.address, p.cross_street,
+	p.postal_code, p.phone, p.area_code, p.lat, p.lng, p.state_id, p.description, p.cover_image,
+	c.city_name, c.slug, c.state
+	FROM places p
+	LEFT JOIN cities c ON p.city_id = c.city_id
+	WHERE (address like '%".$query_city_id."%' OR place_name like '%".$keyword."%') AND p.status = 'approved' AND paid = 1
+	GROUP BY p.place_id
+	ORDER BY p.feat DESC
+	LIMIT :start, :limit";
+	$stmt = $conn->prepare($query);
+	$stmt->bindValue(':start', $start);
+	$stmt->bindValue(':limit', $limit);
+	$stmt->execute();
 }
-
-else{ // both $query_loc and $query_query empty
-	$empty_city_and_query = true;
-}
-
 // now execute query
-$stmt->execute();
+
 $places_arr = [];
+
 /*--------------------------------------------------
 Create list_items array
 --------------------------------------------------*/
-if($total_rows > 0) {
-	while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		$total_rows++;
 		$place_id         = $row['place_id'];
 		$place_name       = $row['place_name'];
 		$address          = $row['address'];
@@ -249,23 +183,14 @@ if($total_rows > 0) {
 		$phone            = $row['phone'];
 		$lat              = $row['lat'];
 		$lng              = $row['lng'];
-		$rating           = $row['avg_rating'];
 		$description      = $row['description'];
+		$cover_image      = $row['cover_image'];
 
 		// short description
 		$description = get_snippet($description, 20);
 
 		// cat icon (just use blank img for now)
 		$cat_icon = $baseurl . '/imgs/blank.png';
-
-		// thumb
-		if(!empty($row['filename'])) {
-			$photo_url = $pic_baseurl . '/' . $place_thumb_folder . '/' . $row['dir'] . '/' . $row['filename'];
-		}
-
-		else {
-			$photo_url = $cat_icon;
-		}
 
 		// clean place name
 		$endash = html_entity_decode('&#x2013;', ENT_COMPAT, 'UTF-8');
@@ -286,45 +211,12 @@ if($total_rows > 0) {
 			'lat'              => $lat,
 			'lng'              => $lng,
 			'cat_icon'         => $cat_icon,
-			'photo_url'        => $photo_url,
-			'rating'           => $rating,
-			'description'      => $description
+			'description'      => $description,
+			'cover_image'      => $cover_image
 		);
-	}
 }
-
 $stmt->closeCursor();
 
-$location = '';
-if(!empty($query_city_name) && !empty($query_state_abbr)) {
-	$location = "$query_city_name, $query_state_abbr";
-}
-
-/*--------------------------------------------------
-Replacements
---------------------------------------------------*/
-if(empty($location)) {
-	$txt_html_title    = $txt_html_title_no_loc;
-	$txt_meta_desc     = $txt_meta_desc_no_loc;
-	$txt_main_title    = $txt_main_title_no_loc;
-
-	$txt_html_title    = str_replace('%search_term%', e($keyword), $txt_html_title);
-	$txt_meta_desc     = str_replace('%search_term%', e($keyword), $txt_meta_desc);
-	$txt_main_title    = str_replace('%search_term%', e($keyword), $txt_main_title);
-	$txt_empty_results = str_replace('%search_term%', e($keyword), $txt_empty_results);
-}
-else {
-	$txt_html_title    = str_replace('%search_term%', e($keyword), $txt_html_title);
-	$txt_html_title    = str_replace('%location%'   , $location     , $txt_html_title);
-	$txt_meta_desc     = str_replace('%search_term%', e($keyword), $txt_meta_desc);
-	$txt_meta_desc     = str_replace('%location%'   , $location     , $txt_meta_desc);
-	$txt_main_title    = str_replace('%search_term%', e($keyword), $txt_main_title);
-	$txt_main_title    = str_replace('%location%'   , $location     , $txt_main_title);
-	$txt_empty_results = str_replace('%search_term%', e($keyword), $txt_empty_results);
-}
-
-// sanitize
-$keyword = e($keyword);
 ?>
 
 <section class="dir-alp dir-pa-sp-top" style="background: url(<?php echo !empty($category_array[0]['backgroud_image'])?$baseurl.'/admin/images/cats/'.$category_array[0]['backgroud_image']:'../images/services/Main.jpg'?>);">
@@ -353,7 +245,7 @@ $keyword = e($keyword);
 								<a href="<?= $baseurl; ?>/listing-details.php?id=<?php echo $row['place_id'];?>">
 									<h3><?php echo $row['place_name'];?></h3>
 								</a>
-								<h4>Alexandra Hill, Singapore</h4>
+								<h4><?php echo $row['place_city_name'];?></h4>
 								<p><b>Address:</b> <?php echo $row['address'];?></p>
 								<div class="list-number">
 									<ul>
@@ -409,7 +301,8 @@ $keyword = e($keyword);
 						$endPage = ($endPage == $pager->getTotalPages()) ? $endPage - 1 : $endPage;
 
 						if($total_rows > 0) {
-							$page_url = "$baseurl/list.php/$sort/page/";
+							$actual_link = $baseurl.'/_searchresults.php?city_id='.$_GET['city_id'].'&query='.$_GET['query'];
+							$page_url = $actual_link."&page=";
 							?>
 							<?php
 							if ($curPage > 1) {

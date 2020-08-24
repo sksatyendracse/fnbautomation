@@ -240,9 +240,11 @@ $txt_main_title = str_replace('%site_name%', $site_name, $txt_main_title);
 													<div class="row tz-file-upload">
 														<div class="file-field input-field">
 															<div class="tz-up-btn"> <span>File</span>
-																<input type="file" name="cover_image"> </div>
+																<input type="file" id="file" name="cover_image"> </div>
 															<div class="file-path-wrapper db-v2-pg-inp">
-																<input class="file-path validate" type="text" name="cover_image">
+																<input class="file-path validate" id="filename" type="text" name="cover_image">
+															</div>
+															<div id="response">
 															</div>
 														</div>
 													</div>
@@ -328,6 +330,27 @@ $(document).ready(function() {
 
 			}
 		);
-    });
+	});
+	
+	var _URL = window.URL || window.webkitURL;
+
+	$("#file").change(function(e) {
+		var file, img;
+		if ((file = this.files[0])) {
+			img = new Image();
+			img.onload = function() {
+				if(this.width !== 1350 || this.height != 500) {
+					alert("please upload image with mentioned size");
+					var file = document.getElementById('file');
+  					file.value = '';
+					$('#filename').val('');
+				}
+			};
+			img.onerror = function() {
+				alert( "not a valid file: " + file.type);
+			};
+			img.src = _URL.createObjectURL(file);
+		}
+	});
 });
 </script>

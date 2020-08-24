@@ -224,7 +224,7 @@ new AjaxUpload('upload-button', {
 
 		else if(response == 10) {
 			// Value: 10; custom error code, failed to move file
-			$('<div id="upload_failed"></div>').appendTo('#uploaded').text('Failed to move file.');
+			$('<div id="upload_failed"></div>').appendTo('#uploaded').text('Failed to move file. Please upload with dimention 750*500');
 			// cancel upload
 			return false;
 		}

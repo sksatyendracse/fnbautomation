@@ -171,13 +171,13 @@ localStorage.setItem("submit_token", "<?php echo $submit_token;?>")
 				<div class="sb2-2-2">
 					<ul>
 						<li><a href="<?= $baseurl; ?>/admin/"><i class="fa fa-home" aria-hidden="true"></i> Home</a> </li>
-						<li class="active-bre"><a href="#"> Add Listing</a> </li>
+						<li class="active-bre"><a href="#"> Edit Listing</a> </li>
 						<li class="page-back"><a href="<?= $baseurl; ?>/admin/"><i class="fa fa-backward" aria-hidden="true"></i> Back</a> </li>
 					</ul>
 				</div>
 				<div class="tz-2 tz-2-admin">
 					<div class="tz-2-com tz-2-main">
-						<h4>Add New Listing</h4>
+						<h4>Edit Listing</h4>
 						<!-- Dropdown Structure -->
 						<div class="split-row">
 							<div class="col-md-12">
@@ -355,11 +355,13 @@ localStorage.setItem("submit_token", "<?php echo $submit_token;?>")
 														</div>
 													</div>
 													<div class="row tz-file-upload">
-														<div class="file-field input-field">
+														<div class="file-field input-field" id="replaceWhole">
 															<div class="tz-up-btn"> <span>File</span>
-																<input type="file" name="cover_image"> </div>
+																<input type="file" id="file" name="cover_image"> </div>
 															<div class="file-path-wrapper db-v2-pg-inp">
-																<input class="file-path validate" type="text" name="cover_image">
+																<input class="file-path validate" type="text" id="filename" name="cover_image">
+															</div>
+															<div id="response">
 															</div>
 														</div>
 													</div>
@@ -445,6 +447,27 @@ $(document).ready(function() {
 
 			}
 		);
-    });
+	});
+	
+	var _URL = window.URL || window.webkitURL;
+
+	$("#file").change(function(e) {
+		var file, img;
+		if ((file = this.files[0])) {
+			img = new Image();
+			img.onload = function() {
+				if(this.width !== 1350 || this.height != 500) {
+					alert("please upload image with mentioned size");
+					var file = document.getElementById('file');
+  					file.value = '';
+					$('#filename').val('');
+				}
+			};
+			img.onerror = function() {
+				alert( "not a valid file: " + file.type);
+			};
+			img.src = _URL.createObjectURL(file);
+		}
+	});
 });
 </script>

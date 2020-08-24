@@ -341,7 +341,7 @@ $txt_transfer_owner = (!empty($txt_transfer_owner)) ? $txt_transfer_owner : "Tra
 										<a href="<?= $baseurl; ?>/listing-details.php?id=<?php echo $row['place_id'];?>">
 											<h3><?php echo $row['place_name'];?></h3>
 										</a>
-										<h4>Alexandra Hill, Singapore</h4>
+										<h4><?php echo $row['city_name'];?></h4>
 										<p><b>Address:</b> <?php echo $row['address'];?></p>
 										<div class="list-number">
 											<ul>

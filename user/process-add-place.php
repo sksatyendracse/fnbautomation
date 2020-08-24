@@ -4,7 +4,7 @@ require_once(__DIR__ . '/../inc/config.php');
 require_once(__DIR__ . '/../inc/smart_resize_image.php');
 require_once(__DIR__ . '/user_area_inc.php');
 require_once(__DIR__ . '/../vendor/swiftmailer/swiftmailer/lib/swift_required.php');
-
+$userid = 1;
 // csrf check
 //require_once(__DIR__ . '/_user_inc_request_with_php.php');
 
@@ -74,6 +74,7 @@ $custom_fields_ids   = (!empty($_POST['custom_fields_ids']  )) ? $_POST['custom_
 $opening_day   = (!empty($_POST['opening_day']  )) ? $_POST['opening_day']   : '';
 $opening_hour   = (!empty($_POST['opening_hour']  )) ? $_POST['opening_hour']   : '';
 $closing_hour   = (!empty($_POST['closing_hour']  )) ? $_POST['closing_hour']   : '';
+$status   = (!empty($_POST['status']  )) ? $_POST['status']   : 'approved';
 
 /*--------------------------------------------------
 prepare vars
@@ -337,7 +338,6 @@ if($post_token == $session_token || 1) {
 		}
 
 		$neighborhood_id = (isset($neighborhood_id) && !empty($neighborhood_id)) ? $neighborhood_id : NULL;
-
 		// insert into places table
 		$query = "INSERT INTO places(
 			userid,
@@ -439,9 +439,9 @@ if($post_token == $session_token || 1) {
 		}
 	    $place_id = $conn->lastInsertId();
 		$_SESSION['last_submitted_place_id'] = $place_id;
-
 		// rel_place_cat
 		if(!empty($category_id)) {
+			
 			$rows = [];
 			$listing_categories = $_POST['category_id'];
 			foreach($listing_categories as $cat_id) {
@@ -459,21 +459,23 @@ if($post_token == $session_token || 1) {
 			}
 			
 		}
+		
 
 		$rows = [];
 		$days = $_POST['opening_day'];
 		foreach($days as $day) {
-			$temp['place_id'] = $place_id;
-			$temp['day'] = $day;
+			$dayvar['place_id'] = $place_id;
+			$dayvar['day'] = $day;
 			$sql = "INSERT INTO business_hours(place_id, day)	VALUES(:place_id, :day)";
 			$stmt= $conn->prepare($sql);
 			try{
-				$stmt->execute($temp);
+				$stmt->execute($dayvar);
 			}catch(Exception $e) {
 				echo 'Message: ' .$e->getMessage();
 			}			
 		}
 
+		
 		// photos
 
 		// delete pics from temp folder that were deleted by user while posting
@@ -485,6 +487,7 @@ if($post_token == $session_token || 1) {
 				}
 			}
 		}
+		
 
 		// uploaded images
 		if(!empty($uploads)) {
@@ -572,7 +575,6 @@ if($post_token == $session_token || 1) {
 				}
 			}
 		}
-
 		$conn->commit();
 		$has_errors = false;
 		$txt_main_title = $txt_main_title_success;
@@ -747,7 +749,6 @@ if(!empty($admin_receive_notification)) {
 		$mailer->send($message);
 	}
 }
-
 //$location = $baseurl."/admin/admin-listings";
 //header("Location: $location");
 ?>

@@ -48,7 +48,10 @@ else {
 	$num_pics = $row['num_pics'];
 
 	if($num_pics < $max_pics + 50) {
-		if(@move_uploaded_file($_FILES['userfile']['tmp_name'], $place_pic_tmp)) {
+		$image_info = getimagesize($_FILES["userfile"]["tmp_name"]);
+		$image_width = $image_info[0];
+		$image_height = $image_info[1];
+		if($image_width == 750 && $image_height == 500 && @move_uploaded_file($_FILES['userfile']['tmp_name'], $place_pic_tmp)) {
 			if(!isset($global_pic_width)) {
 				$global_pic_width = 948;
 			}
